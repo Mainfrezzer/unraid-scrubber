@@ -34,7 +34,7 @@ rm -f $(ls &plugin;/&name;*.txz 2>/dev/null|grep -v '&version;')
 <INLINE>
 **Scrubber**
 
-This plugin performs a Scrub from your BTRFS pools after a unclean shutdown.
+This plugin performs a Scrub from your BTRFS pools after an unclean shutdown.
 </INLINE>
 </FILE>
 
