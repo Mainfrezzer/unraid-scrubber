@@ -1,0 +1,107 @@
+<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE PLUGIN [
+  <!ENTITY name      "scrubber">
+  <!ENTITY author    "ich777">
+  <!ENTITY version   "2025.01.29">
+  <!ENTITY md5       "fa491840d89adeaa59795e7c3c4aee8c">
+  <!ENTITY gitURL    "https://github.com/&author;/unraid-&name;/raw/master">
+  <!ENTITY pluginURL "&gitURL;/&name;.plg">
+  <!ENTITY plugin    "/boot/config/plugins/&name;">
+  <!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
+]>
+
+<PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="7.0.0" support="https://forums.unraid.net/topic/92865-support-ich777-amd-vendor-reset-coraltpu-hpsahba/" icon="stethoscope">
+
+<CHANGES>
+
+###2025.01.29
+- Initial release
+
+</CHANGES>
+
+<FILE Run="/bin/bash">
+<INLINE>
+rm -f $(ls &plugin;/&name;*.txz 2>/dev/null|grep -v '&version;')
+</INLINE>
+</FILE>
+
+<FILE Name="&plugin;/&name;-&version;.txz" Run="upgradepkg --install-new">
+<URL>&gitURL;/packages/&name;-&version;.txz</URL>
+<MD5>&md5;</MD5>
+</FILE>
+
+<FILE Name="&emhttp;/README.md">
+<INLINE>
+**Scrubber**
+
+This plugin performs a Scrub from your BTRFS pools after a unclean shutdown.
+</INLINE>
+</FILE>
+
+<FILE Run="/bin/bash">
+<INLINE>
+
+# Get Array status
+ARRAY_STATUS="$(cat /usr/local/emhttp/state/var.ini 2&gt;/dev/null | grep "fsState" | cut -d '=' -f2 | sed 's/"//g')"
+
+# Check if forcesync is in place and Array is not started
+if [ -f "/boot/config/forcesync" ] &amp;&amp; [ "${ARRAY_STATUS}" != "Started" ]; then
+  # Get Pools
+  POOLS=$(ls -1 /boot/config/pools/)
+
+  # Exit if no Pools are found
+  if [ -z "${POOLS}" ]; then
+    logger "Scrubber: No Pools found!"
+  else
+    # Filter only BTRFS
+    SCRUB_POOLS=""
+    while IFS= read -r line; do
+      FSTYPE=$(grep "diskFsType" /boot/config/pools/${line} | cut -d '=' -f2 | sed 's/"//g')
+      if [[ "${FSTYPE}" =~ [Bb][Tt][Rr][Ff][Ss] ]]; then
+        SCRUB_POOLS+="${line%.*}\n"
+      fi
+      unset FSTYPE
+    done &lt;&lt;&lt; "${POOLS}"
+
+    # Stip unnecessary newlines
+    SCRUB_POOLS=$(echo -e "${SCRUB_POOLS}" | awk 'NF')
+
+    if [ -z "${SCRUB_POOLS}" ]; then
+      logger "Scrubber: No BTRFS Pools found!"
+    else
+      logger "Scrubber: Unclean shutdown detected! Starting scrub from BTRFS Pool(s): ${SCRUB_POOLS//$'\n'/, } after Array is started!"
+      echo "${SCRUB_POOLS}" &gt; /var/run/scrubber
+    fi
+  fi
+else
+  logger "Scrubber: Nothing to do!"
+fi
+
+echo
+echo "-------------------------"
+echo "---Scrubber installed!---"
+echo "-------------------------"
+echo
+
+</INLINE>
+</FILE>
+
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+
+echo "--------------------------"
+echo "---Uninstalling Srubber---"
+echo "--------------------------"
+# Remove plugin related files
+removepkg &name;-&version;
+rm -rf &emhttp;
+rm -rf &plugin;
+echo
+echo "---------------------------"
+echo "---Scrubber uninstalled!---"
+echo "---------------------------"
+echo
+
+</INLINE>
+</FILE>
+</PLUGIN>
