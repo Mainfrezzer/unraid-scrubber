@@ -12,13 +12,13 @@ else
 fi
 
 if [[ -n "$WAIT" && "$WAIT" -ne 0 ]]; then
-  logger "Scrubber: Waiting ${WAIT} seconds before continuing..."
+  logger "BTRFS Scrubber: Waiting ${WAIT} seconds before continuing..."
   sleep ${WAIT}s
 fi
 
 while IFS= read -r line; do
   if [ "${SIMULTANEOUS}" != "true" ]; then
-    logger "Scrubber: Starting non simultaneous Scrub from BTRFS Pool: ${line}"
+    logger "BTRFS Scrubber: Starting non simultaneous Scrub on BTRFS Pool: ${line}"
     btrfs scrub start /mnt/${line}
     sleep 2
     while true; do
@@ -26,7 +26,7 @@ while IFS= read -r line; do
       if [ "${SCRUB_STATE}" == "running" ]; then
         sleep 10
       else
-        logger "Scrubber: Scrub from BTRFS Pool: ${line} done!"
+        logger "BTRFS Scrubber: Scrub on BTRFS Pool: ${line} done!"
         SCRUB_FINISHED="$(btrfs scrub status /mnt/${line})"
         SCRUB_SUMMARY="$(grep "Error summary:" <<< "${SCRUB_FINISHED}")"
         if grep -q "no errors" <<< "${SCRUB_SUMMARY}" ; then
@@ -34,13 +34,13 @@ while IFS= read -r line; do
         else
           IMPORTANCE="alert"
         fi
-        /usr/local/emhttp/plugins/dynamix/scripts/notify -e "Scrubber" -s "BTRFS Scrub from Pool: ${line} finished!" -d "$(echo "${SCRUB_FINISHED}" | awk '{printf "%s<br/>", $0}')" -i ${IMPORTANCE}
+        /usr/local/emhttp/plugins/dynamix/scripts/notify -e "BTRFS Scrubber" -s "BTRFS Scrub on Pool: ${line} finished!" -d "$(echo "${SCRUB_FINISHED}" | awk '{printf "%s<br/>", $0}')" -i ${IMPORTANCE}
         unset SCRUB_STATE SCRUB_FINISHED SCRUB_SUMMARY IMPORTANCE
         break
       fi
     done
   else
-    logger "Scrubber: Starting Scrub from BTRFS Pool: ${line}"
+    logger "BTRFS Scrubber: Starting Scrub on BTRFS Pool: ${line}"
     echo "/usr/local/emhttp/plugins/scrubber/scripts/notify.sh \"${line}\"" | at now -M > /dev/null 2>&1
     btrfs scrub start /mnt/${line}
   fi
