@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
   <!ENTITY name      "scrubber">
   <!ENTITY author    "Mainfrezzer">
-  <!ENTITY version   "2025.01.29">
-  <!ENTITY md5       "fa491840d89adeaa59795e7c3c4aee8c">
+  <!ENTITY version   "2025.03.04">
+  <!ENTITY md5       "77084aed8eb187c761f018013e785895">
   <!ENTITY gitURL    "https://github.com/&author;/unraid-&name;/raw/master">
   <!ENTITY pluginURL "&gitURL;/&name;.plg">
   <!ENTITY plugin    "/boot/config/plugins/&name;">
@@ -14,7 +14,7 @@
 
 <CHANGES>
 
-###2025.01.29
+###2025.03.04
 - Initial release
 
 </CHANGES>
