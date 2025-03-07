@@ -10,7 +10,7 @@
   <!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
 ]>
 
-<PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="7.0.0" support="https://github.com/Mainfrezzer/unraid-scrubber" icon="stethoscope">
+<PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" min="7.0.0" support="https://forums.unraid.net/topic/187844-plugin-btrfs-scrubber" icon="stethoscope">
 
 <CHANGES>
 
